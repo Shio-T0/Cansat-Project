@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/charts.css') }}">
+
+{% endblock %}
+
+{% block body %}
+
+<section class="charts">
+    <div class="chart charts__pie">
+        {{ pie1 | safe }}
+    </div>
+
+    <div class="chart charts__scatter">
+        {{ scatter1 | safe }}
+    </div>
+    <div class="chart charts__bar">
+        {{ bar1 | safe }}
+    </div>
+
+    <section class="ranged-modifiers">
+        <div class="range-container">
+            <label for="xRotation">X Axis Rotation - degº <span id="xRotation_value"></span></label>
+            <input type="range" name="xRotation" id="xRotation" min="0" max="360", value="180">
+        </div>
+        <div class="range-container">
+            <label for="yRotation">Y Axis Rotation - degº <span id="yRotation_value"></span></label>
+            <input type="range" name="yRotation" id="yRotation" min="0" max="180", value="90">
+        </div>
+        <div class="range-container">
+            <label for="refreshRate">Refresh Rate - Hz <span id="refreshRate_value"></span></label>
+            <input type="range" name="refreshRate" id="refreshRate" min="1" max="10", value="5">
+        </div>
+    </section>
+
+</section>
+
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
