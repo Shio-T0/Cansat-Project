@@ -200,6 +200,10 @@ def charts():
         bar1=bar1
     )
 
+@app.route("/axis-analizis")
+def axis_analizis_page():
+    return render_template('axis_analizis.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

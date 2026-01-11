@@ -1,24 +1,48 @@
+// Zoom functionality for the floating widget
+function toggleZoom(el) {
+    el.classList.toggle('zoomed-in');
+    const iframe = el.querySelector('iframe');
+    
+    if (el.classList.contains('zoomed-in')) {
+        iframe.classList.remove('pointer-events-none');
+    } else {
+        iframe.classList.add('pointer-events-none');
+    }
+}
 
-const ranged_xrotation = document.getElementById("xRotation");
-const ranged_yrotation = document.getElementById("yRotation");
-const ranged_refresh_rate = document.getElementById("refreshRate");
+// Mock AI logic (Hook your Python backend fetch here)
+const input = document.getElementById('ai-query-input');
+const output = document.getElementById('ai-chat-output');
 
-const xrotation_label = document.getElementById("xRotation_value");
-const yrotation_label = document.getElementById("yRotation_value");
-const refresh_rate_label = document.getElementById("refreshRate_value");
+input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const query = input.value.trim();
+        if (!query) return;
 
-xrotation_label.innerText = ranged_xrotation.value + "º";
-yrotation_label.innerText = ranged_yrotation.value + "º";
-refresh_rate_label.innerText = ranged_refresh_rate.value + " Hz";
+        // User Message
+        const userDiv = document.createElement('div');
+        userDiv.className = 'bg-slate-800 rounded-lg p-3 text-sm ml-4 border border-slate-700';
+        userDiv.innerHTML = `<p class="text-slate-200">${query}</p>`;
+        output.appendChild(userDiv);
+        
+        input.value = '';
+        output.scrollTop = output.scrollHeight;
 
-ranged_xrotation.addEventListener('input', function () {
-    xrotation_label.innerText = this.value + "º";
+        // AI Response (Placeholder for your backend call)
+        setTimeout(() => {
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 text-sm mr-4';
+            aiDiv.innerHTML = `<p class="text-indigo-200">Analyzing the provided coordinates... Requesting data from Python backend for: "${query}"</p>`;
+            output.appendChild(aiDiv);
+            output.scrollTop = output.scrollHeight;
+        }, 600);
+    }
 });
-ranged_yrotation.addEventListener('input', function () {
-    yrotation_label.innerText = this.value + "º";
-});
-ranged_refresh_rate.addEventListener('input', function () {
-    refresh_rate_label.innerText = this.value + " Hz";
-});
 
-
+// Background Star Animation (Small Detail)
+document.addEventListener('mousemove', (e) => {
+    const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+    const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+    document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+});

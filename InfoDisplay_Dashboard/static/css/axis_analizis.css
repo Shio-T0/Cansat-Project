@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #050505;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: white;
+}
+
+.glass {
+    background: rgba(15, 15, 25, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    box-shadow: 0 0 10px #4ade80;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+#canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.ui-layer {
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.interactive {
+    pointer-events: auto;
+    margin-bottom: 3rem;
+}
+
+.axis-label {
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+.value-display {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+    .glass {
+        display: none;
+    }
+    .status-dot {
+        display: none;
+    }
+    .ui-layer {
+        display: none;
+    }
+    .interactive {
+        display: none;
+    }
+    .axis-label {
+        display: none;
+    }
+    .value-display {
+        display: none;
+    }
+}
