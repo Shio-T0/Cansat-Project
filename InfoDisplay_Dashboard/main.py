@@ -60,7 +60,8 @@ def buildScatterFigure(x: list, y: list) -> object:
             linecolor='rgba(40,40,40,1)'
         ),
         font=dict(color=COLOR_LIST[3]),
-        height=200
+        height=240,
+        width=460
     )
     fig.update_yaxes(
         gridcolor='rgba(40,40,40,1)'
@@ -70,9 +71,9 @@ def buildScatterFigure(x: list, y: list) -> object:
     )
 
     # Making Pyo plot
-    graph_div = pyo.plot(fig, 
-        include_plotlyjs=False, 
-        output_type='div',
+    graph_div = fig.to_html(
+        full_html=False, 
+        include_plotlyjs="cdn", 
         config={'displayModeBar': False,
                 'responsive': True}
     )
@@ -87,14 +88,29 @@ def index():
 
 @app.route("/charts")
 def charts():
-    scatter1 = buildScatterFigure(
+    scatter_a1 = buildScatterFigure(
+        x=[1,2,3,4,5],
+        y=[1,3,4,4,1]
+    )
+    scatter_a2 = buildScatterFigure(
+        x=[1,2,3,4,5],
+        y=[1,3,4,4,1]
+    )
+    scatter_b1 = buildScatterFigure(
+        x=[1,2,3,4,5],
+        y=[1,3,4,4,1]
+    )
+    scatter_b2 = buildScatterFigure(
         x=[1,2,3,4,5],
         y=[1,3,4,4,1]
     )
 
     return render_template(
         "charts.html",
-        scatter1=scatter1,
+        scatter_a1=scatter_a1,
+        scatter_a2=scatter_a2,
+        scatter_b1=scatter_b1,
+        scatter_b2=scatter_b2,
     )
 
 @app.route("/axis-analizis")
