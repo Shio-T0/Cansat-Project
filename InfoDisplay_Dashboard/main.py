@@ -1,12 +1,11 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "datetime",
-#     "eventlet",
 #     "flask",
 #     "flask-socketio",
-#     "pandas",
+#     "openai",
 #     "plotly",
+#     "python-dotenv",
 #     "requests",
 # ]
 # ///
@@ -17,15 +16,40 @@ COLOR_LIST = [
     '#1294FF'
 ]
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
+import requests
+from openai import OpenAI
+
+import os
+from dotenv import load_dotenv
 
 import plotly.graph_objs as go
 import plotly.offline as pyo
 
-import time
 
 app = Flask(__name__)
 
+load_dotenv()
+
+
+# =======
+# Consts
+# =======
+HF_TOKEN = os.environ["HF_KEY"]
+if HF_TOKEN is None:
+    raise RuntimeError("Hugging Face Key not found")
+
+MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+
+BASE_PROMPT = """
+system:
+Your name is InAxon. You are a helpfull AI that is very knowledgeable about physics. You are calm and precise.
+ALWAYS deliver short answers.
+Do NOT ask for adicional information, always answer the best you can.
+"""
+
+def get_current_data():
+    return "[No Data Currently Available, use your own knowledge]"
 
 def buildScatterFigure(x: list, y: list) -> object:
     """
@@ -105,7 +129,6 @@ def charts():
         x=[1,2,3,4,5],
         y=[1,3,4,4,1]
     )
-    time.sleep(5)
     return render_template(
         "charts.html",
         scatter_a1=scatter_a1,
@@ -122,6 +145,39 @@ def axis_analizis_page():
 @app.route("/loading")
 def loading():
     return render_template('loading.html')
+
+
+@app.route("/get-ai-data", methods=["POST"])
+def get_AI_data():
+    data = request.get_json()
+    query = data["query"]
+    
+    sys_prompt = BASE_PROMPT + f"Use following data to answer any questions related to it (the data is one obtained experimentaly):\n {get_current_data()}\n"
+
+    
+    client = OpenAI(
+        base_url="https://router.huggingface.co/v1",
+        api_key=HF_TOKEN,
+    )
+
+    completion = client.chat.completions.create(
+        model="mistralai/Mistral-7B-Instruct-v0.2:featherless-ai",
+        messages=[
+            {
+                "role": "system",
+                "content": sys_prompt
+            },
+            {
+                "role": "user",
+                "content": query
+            }
+        ],
+    )
+
+    generated_text = completion.choices[0].message.content
+
+    return jsonify(message=generated_text)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

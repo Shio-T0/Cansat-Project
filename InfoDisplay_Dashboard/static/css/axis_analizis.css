@@ -60,6 +60,10 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+.word-spaced {
+    word-spacing: 5px;
+}
+
 @media (max-width: 700px) {
     .glass {
         display: none;

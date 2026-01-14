@@ -10,6 +10,25 @@ function toggleZoom(el) {
     }
 }
 
+/*
+    AI Logic
+*/
+
+async function getAIResponse(query) {
+    res = await fetch("/get-ai-data", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query: query,
+        })
+    })
+    let data = res.json();
+    return data;
+}
+
+
 // Mock AI logic (Hook your Python backend fetch here)
 const input = document.getElementById('ai-query-input');
 const output = document.getElementById('ai-chat-output');
@@ -29,14 +48,18 @@ input.addEventListener('keypress', (e) => {
         input.value = '';
         output.scrollTop = output.scrollHeight;
 
-        // AI Response (Placeholder for your backend call)
-        setTimeout(() => {
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 text-sm mr-4';
-            aiDiv.innerHTML = `<p class="text-indigo-200">Analyzing the provided coordinates... Requesting data from Python backend for: "${query}"</p>`;
-            output.appendChild(aiDiv);
-            output.scrollTop = output.scrollHeight;
-        }, 600);
+
+
+        // AI Response
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 text-sm mr-4';
+        aiDiv.innerHTML = `<p>Thinking...</p>`;
+        output.appendChild(aiDiv);
+        output.scrollTop = output.scrollHeight;
+
+        getAIResponse(query).then(response => {
+            aiDiv.innerHTML = `<p>${response.message}</p>`;
+        })
     }
 });
 
