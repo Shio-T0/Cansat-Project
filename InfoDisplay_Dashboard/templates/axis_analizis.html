@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/axis_analizis.css') }}">
+{% endblock %}
+
+
 {% block body %}
 
 <div id="canvas-container"></div>

@@ -11,14 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 
+    {% block head %}
+    {% endblock %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/axis_analizis.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/charts.css') }}">
 </head>
 <body class="p-6">
     {% block body %}
     {% endblock %}
 
-    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ from flask import Flask, render_template, jsonify
 import plotly.graph_objs as go
 import plotly.offline as pyo
 
+import time
 
 app = Flask(__name__)
 
@@ -104,7 +105,7 @@ def charts():
         x=[1,2,3,4,5],
         y=[1,3,4,4,1]
     )
-
+    time.sleep(5)
     return render_template(
         "charts.html",
         scatter_a1=scatter_a1,
@@ -117,6 +118,10 @@ def charts():
 def axis_analizis_page():
     return render_template('axis_analizis.html')
 
+
+@app.route("/loading")
+def loading():
+    return render_template('loading.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

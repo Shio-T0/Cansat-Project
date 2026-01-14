@@ -1,0 +1,102 @@
+:root {
+    --space-black: #05070a;
+    --nebula-purple: #6366f1;
+    --star-gold: #fde047;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--space-black);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.ui-overlay {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: white;
+    pointer-events: none;
+}
+
+/* Pulsar Animation */
+.pulsar {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, #fff 0%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+    animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; filter: brightness(1); }
+    50% { transform: scale(1.1); opacity: 1; filter: brightness(1.5); }
+}
+
+/* Orbiting Rings */
+.orbit {
+    position: absolute;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 50%;
+    animation: rotate linear infinite;
+}
+
+.orbit-1 { width: 160px; height: 160px; animation-duration: 4s; }
+.orbit-2 { width: 220px; height: 220px; animation-duration: 7s; border-style: dashed; }
+.orbit-3 { width: 300px; height: 300px; animation-duration: 12s; border-color: rgba(253, 224, 71, 0.2); }
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 4rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-weight: 300;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.progress-container {
+    width: 200px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-top: 1rem;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--nebula-purple), #a855f7);
+    box-shadow: 0 0 10px var(--nebula-purple);
+    transition: width 0.3s ease;
+}
+
+.status-msg {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--nebula-purple);
+    height: 1.2rem;
+}
