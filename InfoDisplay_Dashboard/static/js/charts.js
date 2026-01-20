@@ -1,3 +1,5 @@
+const { useLayoutEffect } = require("react");
+
 // Zoom functionality for the floating widget
 function toggleZoom(el) {
     el.classList.toggle('zoomed-in');
@@ -68,4 +70,49 @@ document.addEventListener('mousemove', (e) => {
     const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
     const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
     document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+});
+
+
+
+/*
+    Plot Generator
+*/
+const plotContainer = document.getElementById('graph-1a');
+
+const initialData = [{
+    x: [],
+    y: [],
+    mode: 'lines+markers',
+    name: 'Live Stream',
+    line: { color: '#4f46e5', width: 3, shape: 'spline' },
+    marker: { size: 8, color: '#4f46e5', opacity: 0.7 },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(79, 70, 229, 0.1)'
+}];
+
+const layout = {
+    autosize: true,
+    margin: { l: 50, r: 20, t: 20, b: 50 },
+    xaxis: { title: 'Timestamp', gridcolor: '#f3f4f6', zeroline: false },
+    yaxis: { title: 'Value', gridcolor: '#f3f4f6', zeroline: false },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    hovermode: 'x unified'
+};
+
+const config = { responsive: true, displayModeBar: false };
+Plotly.newPlot(plotContainer, initialData, layout, config);
+
+// FIX: Ensure this variable name matches the one used in the listener
+const socket = io(); 
+
+socket.on("new_data", (data) => {
+    // Ensure data.x and data.y exist
+    if (data.x !== undefined && data.y !== undefined) {
+        const update = {
+            x: [[data.x]],
+            y: [[data.y]]
+        };
+        Plotly.extendTraces(plotContainer, update, [0]);
+    }
 });
