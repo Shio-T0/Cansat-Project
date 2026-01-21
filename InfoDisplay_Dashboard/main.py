@@ -10,18 +10,11 @@
 #     "requests",
 # ]
 # ///
-COLOR_LIST = [
-    '#00FFF2',
-    '#4F86C6',
-    '#5100FF',
-    '#1294FF'
-]
 
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
 
 from threading import Thread, Event
-import requests
 from openai import OpenAI
 import time
 import random
@@ -29,8 +22,6 @@ import random
 import os
 from dotenv import load_dotenv
 
-import plotly.graph_objs as go
-import plotly.offline as pyo
 
 
 app = Flask(__name__)
@@ -127,10 +118,11 @@ def generate_data():
     while not thread_stop_event.is_set():
         time.sleep(0.5)
         x += 1
-        y1a = random.randint(1, 50)
-        y1b = random.randint(1, 50)
-        y2a = random.randint(1, 50)
-        y2b = random.randint(1, 50)
+        y1b = random.randint(8, 25)
+        y1a = y1b + random.randint(1, 3)
+
+        y2b = random.randint(899, 1013)
+        y2a = y2b + random.randint(4,15)
 
         data = {
             "x": x,

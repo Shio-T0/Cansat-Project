@@ -74,13 +74,13 @@
         <!-- PAIR 1: SCATTER GRAPHS -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section class="glass-panel p-5">
-                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par A: Temperatura / DistânciaZ (Experimental)</h3>
+                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par A: Temperatura - ºC / DistânciaZ (Experimental)</h3>
                 <!-- GRAPH HOLDER 1A -->
                 <div id="graph-1a" class="chart-placeholder text-slate-600">
                 </div>
             </section>
             <section class="glass-panel p-5">
-                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par A: Tempratuda / DistânciaZ (Esperado)</h3>
+                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par A: Tempratuda - ºC / DistânciaZ (Esperado)</h3>
                 <!-- GRAPH HOLDER 1B -->
                 <div id="graph-1b" class="chart-placeholder text-slate-600">
 
@@ -91,14 +91,14 @@
         <!-- PAIR 2: SCATTER GRAPHS -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section class="glass-panel p-5">
-                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par B: Pressão / DistânciaZ (Experimental)</h3>
+                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par B: Pressão - hPa / DistânciaZ (Experimental)</h3>
                 <!-- GRAPH HOLDER 2A -->
                 <div id="graph-2a" class="chart-placeholder text-slate-600">
 
                 </div>
             </section>
             <section class="glass-panel p-5">
-                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par B: Pressão / DistânciaZ (Esperado)</h3>
+                <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase">Par B: Pressão - hPa / DistânciaZ (Esperado)</h3>
                 <!-- GRAPH HOLDER 2B -->
                 <div id="graph-2b" class="chart-placeholder text-slate-600">
 
@@ -113,8 +113,8 @@
                 <div class="text-xl font-mono text-indigo-400">12,842</div>
             </div>
             <div class="glass-panel p-4 text-center">
-                <div class="text-xs text-slate-500 mb-1">DESVIO AUTOMATICO</div>
-                <div class="text-xl font-mono text-indigo-400">0.02%</div>
+                <div class="text-xs text-slate-500 mb-1">ERRO PERCENTUAL MÁXIMO</div>
+                <div class="text-xl font-mono text-indigo-400"><span id="deviation1"></span>% | <span id="deviation2"></span>%</div>
             </div>
             <div class="glass-panel p-4 text-center">
                 <div class="text-xs text-slate-500 mb-1">TAXA DE RECEÇÃO DE DADOS</div>

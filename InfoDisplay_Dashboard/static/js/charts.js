@@ -126,6 +126,8 @@ Plotly.newPlot(plotContainer2B, initialData, layout, config);
 const socket = io.connect(); 
 
 let statusButton = document.getElementById("backendStatus");
+let deviationContainer1 = document.getElementById("deviation1");
+let deviationContainer2 = document.getElementById("deviation2");
 
 socket.on("connect", () => {
     console.log("Connected to Backend");
@@ -172,6 +174,26 @@ socket.on("new_data", (data) => {
         x: [xData],
         y: [yData2B]
     }, {}, [0]);
+
+
+    let maxDeviation1 = 0;
+    let maxDeviation2 = 0;
+
+    if (data.y1b != 0 || data.y2b != 0) {
+        maxDeviation1 = (Math.abs(data.y1b - data.y1a) / data.y1b) * 100
+        maxDeviation2 = (Math.abs(data.y2b - data.y2a) / data.y2b) * 100
+    }
+    
+    console.log("Dev1: ", maxDeviation1)
+    console.log("Dev2: ", maxDeviation2)
+
+    if (+deviationContainer1.textContent < maxDeviation1) {
+        deviationContainer1.textContent = maxDeviation1.toFixed(2)
+    }
+    if (+deviationContainer2.textContent < maxDeviation2) {
+        deviationContainer2.textContent = maxDeviation2.toFixed(2)
+    }
+
 });
 
 statusButton.addEventListener('click', () => {
