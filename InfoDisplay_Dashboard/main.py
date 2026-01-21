@@ -127,11 +127,17 @@ def generate_data():
     while not thread_stop_event.is_set():
         time.sleep(0.5)
         x += 1
-        y = random.randint(1, 50)
+        y1a = random.randint(1, 50)
+        y1b = random.randint(1, 50)
+        y2a = random.randint(1, 50)
+        y2b = random.randint(1, 50)
 
         data = {
             "x": x,
-            "y": y,
+            "y1a": y1a,
+            "y1b": y1b,
+            "y2a": y2a,
+            "y2b": y2b,
             'timestamp': time.time()
         }
 

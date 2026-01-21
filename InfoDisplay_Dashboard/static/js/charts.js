@@ -76,17 +76,25 @@ document.addEventListener('mousemove', (e) => {
 /*
     Plot Generator
 */
-const plotContainer = document.getElementById('graph-1a');
+const plotContainer1A = document.getElementById('graph-1a');
+const plotContainer1B = document.getElementById('graph-1b');
+const plotContainer2A = document.getElementById('graph-2a');
+const plotContainer2B = document.getElementById('graph-2b');
 
 const maxDataPoints = 30
 
 let xData = []
-let yData = []
+
+let yData1A = []
+let yData1B = []
+let yData2A = []
+let yData2B = []
+
 
 
 const initialData = [{
     x: xData,
-    y: yData,
+    y: yData1A,
     mode: 'lines+markers',
     name: 'Live Stream',
     line: { color: '#4f46e5', width: 3, shape: 'spline' },
@@ -110,7 +118,10 @@ const layout = {
 };
 
 const config = { responsive: true, displayModeBar: false };
-Plotly.newPlot(plotContainer, initialData, layout, config);
+Plotly.newPlot(plotContainer1A, initialData, layout, config);
+Plotly.newPlot(plotContainer1B, initialData, layout, config);
+Plotly.newPlot(plotContainer2A, initialData, layout, config);
+Plotly.newPlot(plotContainer2B, initialData, layout, config);
 
 const socket = io.connect(); 
 
@@ -130,16 +141,36 @@ socket.on("new_data", (data) => {
     console.log("New data Triggered");
     console.log("Received data: ", data);
     xData.push(data.x);
-    yData.push(data.y);
+
+    yData1A.push(data.y1a);
+    yData1B.push(data.y1b);
+    yData2A.push(data.y2a);
+    yData2B.push(data.y2b);
     
     if (xData.length > maxDataPoints) {
         xData.shift();
-        yData.shift();
+
+        yData1A.shift();
+        yData1B.shift();
+        yData2A.shift();
+        yData2B.shift();
     }
 
-    Plotly.update(plotContainer, {
+    Plotly.update(plotContainer1A, {
         x: [xData],
-        y: [yData]
+        y: [yData1A]
+    }, {}, [0]);
+    Plotly.update(plotContainer1B, {
+        x: [xData],
+        y: [yData1B]
+    }, {}, [0]);
+    Plotly.update(plotContainer2A, {
+        x: [xData],
+        y: [yData2A]
+    }, {}, [0]);
+    Plotly.update(plotContainer2B, {
+        x: [xData],
+        y: [yData2B]
     }, {}, [0]);
 });
 
