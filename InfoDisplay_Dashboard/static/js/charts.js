@@ -1,4 +1,4 @@
-const { useLayoutEffect } = require("react");
+
 
 // Zoom functionality for the floating widget
 function toggleZoom(el) {
@@ -31,7 +31,6 @@ async function getAIResponse(query) {
 }
 
 
-// Mock AI logic (Hook your Python backend fetch here)
 const input = document.getElementById('ai-query-input');
 const output = document.getElementById('ai-chat-output');
 
@@ -79,40 +78,80 @@ document.addEventListener('mousemove', (e) => {
 */
 const plotContainer = document.getElementById('graph-1a');
 
+const maxDataPoints = 30
+
+let xData = []
+let yData = []
+
+
 const initialData = [{
-    x: [],
-    y: [],
+    x: xData,
+    y: yData,
     mode: 'lines+markers',
     name: 'Live Stream',
     line: { color: '#4f46e5', width: 3, shape: 'spline' },
-    marker: { size: 8, color: '#4f46e5', opacity: 0.7 },
+    marker: { size: 8, color: '#3778f0ff', opacity: 1 },
     fill: 'tozeroy',
     fillcolor: 'rgba(79, 70, 229, 0.1)'
 }];
 
 const layout = {
     autosize: true,
-    margin: { l: 50, r: 20, t: 20, b: 50 },
-    xaxis: { title: 'Timestamp', gridcolor: '#f3f4f6', zeroline: false },
-    yaxis: { title: 'Value', gridcolor: '#f3f4f6', zeroline: false },
+    margin: { l: 15, r: 15, t: 10, b: 15 },
+    xaxis: { title: 'Timestamp', gridcolor: '#f3f4f677', zeroline: false },
+    yaxis: { title: 'Value', gridcolor: '#f3f4f677', zeroline: false },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
-    hovermode: 'x unified'
+    hovermode: 'x unified',
+    hoverlabel: {
+        bgcolor: "#1e1e1e5a",
+        font: {color: "#fff"}
+    }
 };
 
 const config = { responsive: true, displayModeBar: false };
 Plotly.newPlot(plotContainer, initialData, layout, config);
 
-// FIX: Ensure this variable name matches the one used in the listener
-const socket = io(); 
+const socket = io.connect(); 
+
+let statusButton = document.getElementById("backendStatus");
+
+socket.on("connect", () => {
+    console.log("Connected to Backend");
+    console.log('Socket ID:', socket.id);
+    statusButton.textContent = "● Link Ativado e funcional";
+})
+socket.on("disconnect", () => {
+    console.log("Backend Disconnected");
+    statusButton.textContent = "● Link não operacional";
+})
 
 socket.on("new_data", (data) => {
-    // Ensure data.x and data.y exist
-    if (data.x !== undefined && data.y !== undefined) {
-        const update = {
-            x: [[data.x]],
-            y: [[data.y]]
-        };
-        Plotly.extendTraces(plotContainer, update, [0]);
+    console.log("New data Triggered");
+    console.log("Received data: ", data);
+    xData.push(data.x);
+    yData.push(data.y);
+    
+    if (xData.length > maxDataPoints) {
+        xData.shift();
+        yData.shift();
     }
+
+    Plotly.update(plotContainer, {
+        x: [xData],
+        y: [yData]
+    }, {}, [0]);
+});
+
+statusButton.addEventListener('click', () => {
+    console.log("Pressed, emiting");
+    socket.emit('start_stream');
+    console.log("finished emiting");
+});
+statusButton.addEventListener('dblclick', () => {
+    socket.emit('stop_stream');
+});
+
+socket.on("status", (msg) => {
+    console.log("Status: ", msg.message);
 });

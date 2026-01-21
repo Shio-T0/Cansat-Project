@@ -18,9 +18,9 @@ COLOR_LIST = [
 ]
 
 from flask import Flask, render_template, jsonify, request
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
-import threading
+from threading import Thread, Event
 import requests
 from openai import OpenAI
 import time
@@ -34,7 +34,11 @@ import plotly.offline as pyo
 
 
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode="eventlet")
+app.config['SECRET_KEY'] = 'nosecret'
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', logger=True, engineio_logger=True)
+
+thread = None
+thread_stop_event = Event()
 
 load_dotenv()
 
@@ -58,20 +62,11 @@ Do NOT ask for adicional information, always answer the best you can.
 def get_current_data():
     return "[No Data Currently Available, use your own knowledge]"
 
-def generate_data():
-    x = 0
-    while True:
-        time.sleep(2)
-        x += 1
-        y = random.random()
 
-        socketio.emit("new_data", {
-            "x": x,
-            "y": y
-        })
 
-    
-    threading.Thread(target=generate_data, daemon=True).start()
+
+
+
 
 
 @app.route("/")
@@ -123,6 +118,54 @@ def get_AI_data():
     generated_text = completion.choices[0].message.content
 
     return jsonify(message=generated_text)
+
+# ===========
+# Sockets
+# ===========
+def generate_data():
+    x = 0
+    while not thread_stop_event.is_set():
+        time.sleep(0.5)
+        x += 1
+        y = random.randint(1, 50)
+
+        data = {
+            "x": x,
+            "y": y,
+            'timestamp': time.time()
+        }
+
+        print("Sending data: ", data)
+
+        socketio.emit("new_data", data, namespace="/")
+        print("Emit completed")
+
+
+@socketio.on("connect")
+def handle_connect():
+    global thread
+    print("Client Connected")
+
+    if thread is None or not thread.is_alive():
+        thread_stop_event.clear()
+        thread = Thread(target=generate_data)
+        thread.daemon = True
+        print("Starting thread")
+        thread.start()
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("Disconnected Client")
+
+@socketio.on("start_stream")
+def handle_start():
+    print("Starting stream...")
+    emit('status', {'message': 'Streamming started'})
+
+@socketio.on("stop_stream")
+def handle_stop():
+    thread_stop_event.set()
+    emit('status', {'message': 'Streaming stopped'})
 
 
 if __name__ == "__main__":
