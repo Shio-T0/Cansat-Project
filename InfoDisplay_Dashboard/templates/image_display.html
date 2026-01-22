@@ -1,0 +1,39 @@
+
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/image_display.css') }}">
+{% endblock %}
+
+{% block body %}
+
+
+<canvas id="star-canvas"></canvas>
+
+<div class="p-6 md:p-12">
+    <header class="flex justify-between items-end mb-12 border-b border-white/10 pb-6">
+        <div>
+            <h1 class="text-xs tracking-[0.4em] uppercase text-cyan-500 font-bold mb-1">InAxon Image Telemetrry</h1>
+            <h2 class="text-3xl font-light tracking-tight">InAxon-Monitor <span class="text-white/20">v2.0</span></h2>
+        </div>
+        <div id="connection-status" class="text-[10px] font-bold uppercase tracking-widest text-red-500 flex items-center gap-2">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            A RECEBER IMAGENS...
+        </div>
+    </header>
+
+    <!-- Dynamic Grid -->
+    <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Shimmering placeholders -->
+        <div class="image-frame shimmer"></div>
+        <div class="image-frame shimmer"></div>
+        <div class="image-frame shimmer"></div>
+        <div class="image-frame shimmer"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/image_display.js') }}"></script>
+{% endblock %}

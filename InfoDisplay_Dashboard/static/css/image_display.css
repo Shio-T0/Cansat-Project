@@ -1,0 +1,82 @@
+:root {
+    --space-black: #020408;
+    --accent-cyan: #00f2ff;
+}
+
+body {
+    background-color: var(--space-black);
+    color: #fff;
+    margin: 0;
+    overflow-x: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Animated background stars */
+#star-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Image Holder Styling */
+.image-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.image-frame:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.15);
+    transform: scale(1.02);
+}
+
+.image-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.4s ease;
+}
+
+.image-frame:hover img {
+    opacity: 1;
+}
+
+/* Minimal Timestamp Overlay */
+.timestamp {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-family: monospace;
+    font-size: 10px;
+    color: var(--accent-cyan);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+    border-left: 2px solid var(--accent-cyan);
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+/* Loading shimmer */
+.shimmer {
+    background: linear-gradient(90deg, #05070a 25%, #0a0e14 50%, #05070a 75%);
+    background-size: 200% 100%;
+    animation: shimmer-load 2s infinite linear;
+}
+
+@keyframes shimmer-load {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--space-black); }
+::-webkit-scrollbar-thumb { background: #1a1e26; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }

@@ -5,6 +5,7 @@
 #     "flask",
 #     "flask-socketio",
 #     "openai",
+#     "pathlib",
 #     "plotly",
 #     "python-dotenv",
 #     "requests",
@@ -21,6 +22,7 @@ import random
 
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 
 
@@ -50,13 +52,10 @@ ALWAYS deliver short answers.
 Do NOT ask for adicional information, always answer the best you can.
 """
 
+ASSETS = Path("./assets")
+
 def get_current_data():
     return "[No Data Currently Available, use your own knowledge]"
-
-
-
-
-
 
 
 
@@ -110,6 +109,11 @@ def get_AI_data():
 
     return jsonify(message=generated_text)
 
+
+@app.route("/image_display")
+def image_display():
+    return render_template('image_display.html')
+
 # ===========
 # Sockets
 # ===========
@@ -138,6 +142,10 @@ def generate_data():
         socketio.emit("new_data", data, namespace="/")
         print("Emit completed")
 
+# TODO: Implement this:
+def send_images():
+    for image in ASSETS.iterdir():
+        pass
 
 @socketio.on("connect")
 def handle_connect():
@@ -148,8 +156,11 @@ def handle_connect():
         thread_stop_event.clear()
         thread = Thread(target=generate_data)
         thread.daemon = True
-        print("Starting thread")
         thread.start()
+        
+        image_thread = Thread(target=send_images)
+        image_thread.daemon = True
+        image_thread.start()
 
 @socketio.on("disconnect")
 def handle_disconnect():
@@ -158,7 +169,9 @@ def handle_disconnect():
 @socketio.on("start_stream")
 def handle_start():
     print("Starting stream...")
+    thread_stop_event = Event()
     emit('status', {'message': 'Streamming started'})
+
 
 @socketio.on("stop_stream")
 def handle_stop():
