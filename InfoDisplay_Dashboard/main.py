@@ -12,10 +12,9 @@
 # ]
 # ///
 
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
 
-from threading import Thread, Event
 from openai import OpenAI
 import time
 from datetime import datetime
@@ -30,12 +29,10 @@ from pathlib import Path
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nosecret'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', logger=True, engineio_logger=True)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 thread = None
 image_thread = None
-thread_stop_event = Event()
-image_thread_stop_event = Event()
 
 load_dotenv()
 
@@ -56,7 +53,7 @@ ALWAYS deliver short answers.
 Do NOT ask for adicional information, always answer the best you can.
 """
 
-ASSETS = Path("./assets")
+ASSETS = Path("./InfoDisplay_Dashboard/static/assets")
 
 def get_current_data():
     return "[No Data Currently Available, use your own knowledge]"
@@ -125,7 +122,7 @@ def image_display():
 # ==============================================
 def generate_data():
     x = 0
-    while not thread_stop_event.is_set():
+    while True:
         time.sleep(0.5)
         x += 1
         y1b = random.randint(8, 25)
@@ -152,37 +149,27 @@ def generate_data():
 def send_images():
     used_images = []
     print("send_images called")
-    while not image_thread_stop_event.is_set():
+    while True:
+        try:
+            for image in ASSETS.iterdir():
+                if image not in used_images:
+                    time.sleep(2)
+                    print(f"sending image: {image} with name: {image.name}")
 
-        for image in ASSETS.iterdir():
-            if image not in used_images:
-                time.sleep(2)
-                print("sending image: ", image)
-
-                socketio.emit("new_image", {
-                    "url": url_for('assets', filename=image.name),
-                    "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
-                }, namespace="/")
-                used_images.append(image)
+                    socketio.emit("new_image", {
+                        "url": f"./static/assets/{image.name}",
+                        "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
+                    }, namespace="/")
+                    used_images.append(image)
+        except FileNotFoundError:
+            print("File not found at: ", ASSETS.absolute())
+        
 
 @socketio.on("connect")
 def handle_connect():
-    global thread
-    global image_thread
     print("Client Connected")
 
-    if thread is None or not thread.is_alive():
-        thread_stop_event.clear()
-        thread = Thread(target=generate_data)
-        thread.daemon = True
-        thread.start()
     
-    if image_thread is None or not image_thread.is_alive():
-        print("starting image_thread")
-        image_thread_stop_event.clear()
-        image_thread = Thread(target=send_images)
-        image_thread.daemon = True
-        image_thread.start()
 
 @socketio.on("disconnect")
 def handle_disconnect():
@@ -196,9 +183,10 @@ def handle_start():
 
 @socketio.on("stop_stream")
 def handle_stop():
-    thread_stop_event.set()
     emit('status', {'message': 'Streaming stopped'})
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.start_background_task(generate_data)
+    socketio.start_background_task(send_images)
+    socketio.run(app, debug=True, port=4000)

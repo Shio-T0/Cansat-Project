@@ -144,6 +144,7 @@ if (window.location.pathname === "/image-display") {
         grid.innerHTML = '';
         const frame = document.createElement('div');
         frame.className = 'image-frame';
+        console.log("Got image in js: ", image.url)
         frame.innerHTML = `
             <img src="${image.url}" loading="lazy">
             <div class="timestamp">${image.timestamp || '00:00:00.000'}</div>
