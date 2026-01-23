@@ -12,12 +12,13 @@
 # ]
 # ///
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, url_for
 from flask_socketio import SocketIO, emit
 
 from threading import Thread, Event
 from openai import OpenAI
 import time
+from datetime import datetime
 import random
 
 import os
@@ -26,12 +27,15 @@ from pathlib import Path
 
 
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nosecret'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', logger=True, engineio_logger=True)
 
 thread = None
+image_thread = None
 thread_stop_event = Event()
+image_thread_stop_event = Event()
 
 load_dotenv()
 
@@ -110,13 +114,15 @@ def get_AI_data():
     return jsonify(message=generated_text)
 
 
-@app.route("/image_display")
+@app.route("/image-display")
 def image_display():
     return render_template('image_display.html')
 
-# ===========
+
+
+# ==============================================
 # Sockets
-# ===========
+# ==============================================
 def generate_data():
     x = 0
     while not thread_stop_event.is_set():
@@ -137,19 +143,32 @@ def generate_data():
             'timestamp': time.time()
         }
 
-        print("Sending data: ", data)
+        # print("Sending data: ", data)
 
         socketio.emit("new_data", data, namespace="/")
-        print("Emit completed")
+        # print("Emit completed")
 
 # TODO: Implement this:
 def send_images():
-    for image in ASSETS.iterdir():
-        pass
+    used_images = []
+    print("send_images called")
+    while not image_thread_stop_event.is_set():
+
+        for image in ASSETS.iterdir():
+            if image not in used_images:
+                time.sleep(2)
+                print("sending image: ", image)
+
+                socketio.emit("new_image", {
+                    "url": url_for('assets', filename=image.name),
+                    "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
+                }, namespace="/")
+                used_images.append(image)
 
 @socketio.on("connect")
 def handle_connect():
     global thread
+    global image_thread
     print("Client Connected")
 
     if thread is None or not thread.is_alive():
@@ -157,7 +176,10 @@ def handle_connect():
         thread = Thread(target=generate_data)
         thread.daemon = True
         thread.start()
-        
+    
+    if image_thread is None or not image_thread.is_alive():
+        print("starting image_thread")
+        image_thread_stop_event.clear()
         image_thread = Thread(target=send_images)
         image_thread.daemon = True
         image_thread.start()
@@ -169,7 +191,6 @@ def handle_disconnect():
 @socketio.on("start_stream")
 def handle_start():
     print("Starting stream...")
-    thread_stop_event = Event()
     emit('status', {'message': 'Streamming started'})
 
 

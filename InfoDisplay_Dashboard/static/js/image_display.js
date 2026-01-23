@@ -2,32 +2,9 @@
  * CONFIGURATION
  * Update the URL to your Python backend endpoint.
  */
-const ENDPOINT = 'http://localhost:5000/api/images';
 
 const grid = document.getElementById('gallery-grid');
 const statusEl = document.getElementById('connection-status');
-
-/**
- * FETCH LOGIC
- * Expected Python response: JSON array of objects e.g. [{ url: "...", timestamp: "..." }]
- */
-async function updateGallery() {
-    try {
-        const response = await fetch(ENDPOINT);
-        if (!response.ok) throw new Error('Offline');
-        
-        const data = await response.json();
-        renderImages(data);
-        setConnection(true);
-    } catch (err) {
-        console.warn("Backend not reached. Using fallback demo visuals.");
-        setConnection(false);
-        loadFallback();
-    }
-}
-
-
-
 
 
 /**
@@ -72,7 +49,5 @@ function initBackground() {
 // Initialize everything
 window.onload = () => {
     initBackground();
-    updateGallery();
     // Polling: Auto-refresh every 30 seconds
-    setInterval(updateGallery, 30000);
 };
