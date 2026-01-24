@@ -1,7 +1,7 @@
 
-const socket = io(); 
+const socket = io();
 
-if (window.location.pathname === "/chats") {
+if (window.location.pathname === "/charts") {
     const plotContainer1A = document.getElementById('graph-1a');
     const plotContainer1B = document.getElementById('graph-1b');
     const plotContainer2A = document.getElementById('graph-2a');
@@ -137,8 +137,21 @@ if (window.location.pathname === "/chats") {
     socket.on("status", (msg) => {
         console.log("Status: ", msg.message);
     });
+
+    
+    currentImageHolder = document.getElementById("currentImage");
+    const lastImage = localStorage.getItem('lastImage');
+    if (lastImage) {
+        currentImageHolder.setAttribute('src', lastImage);
+    }
+
+    socket.on("new_image", (image) => {
+        currentImageHolder.setAttribute('src', `${image.url}`);
+        
+        localStorage.setItem('lastImage', `${image.url}`);
+    });
 }
-if (window.location.pathname === "/image-display") {
+else if (window.location.pathname === "/image-display") {
     socket.on("new_image", (image) => {
         const frame = document.createElement('div');
         frame.className = 'image-frame';
