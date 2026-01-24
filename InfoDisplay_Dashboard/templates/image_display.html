@@ -28,10 +28,12 @@
     <!-- Dynamic Grid -->
     <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <!-- Shimmering placeholders -->
-        <div class="image-frame shimmer"></div>
-        <div class="image-frame shimmer"></div>
-        <div class="image-frame shimmer"></div>
-        <div class="image-frame shimmer"></div>
+        {% for image in img_list %}
+            <div class="image-frame">
+                <img src="{{ image.url }}" loading="lazy">
+                <div class="timestamp">{{ image.timestamp }}</div>
+            </div>
+        {% endfor %}
     </div>
 </div>
 

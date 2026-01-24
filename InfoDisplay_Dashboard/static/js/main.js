@@ -138,10 +138,8 @@ if (window.location.pathname === "/chats") {
         console.log("Status: ", msg.message);
     });
 }
-
 if (window.location.pathname === "/image-display") {
     socket.on("new_image", (image) => {
-        grid.innerHTML = '';
         const frame = document.createElement('div');
         frame.className = 'image-frame';
         console.log("Got image in js: ", image.url)

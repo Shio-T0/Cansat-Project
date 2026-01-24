@@ -53,12 +53,24 @@ ALWAYS deliver short answers.
 Do NOT ask for adicional information, always answer the best you can.
 """
 
-ASSETS = Path("./InfoDisplay_Dashboard/static/assets")
+IMAGES_DIR = Path("./InfoDisplay_Dashboard/static/assets")
+
 
 def get_current_data():
     return "[No Data Currently Available, use your own knowledge]"
 
+def get_available_images() -> list:
+    img_list = []
 
+    for image in IMAGES_DIR.iterdir():
+
+        img_list.append({
+            "url": f"./static/assets/{image.name}",
+            "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        })
+    return img_list
+
+img_list = get_available_images()
 
 @app.route("/")
 def index():
@@ -113,7 +125,7 @@ def get_AI_data():
 
 @app.route("/image-display")
 def image_display():
-    return render_template('image_display.html')
+    return render_template('image_display.html', img_list=img_list)
 
 
 
@@ -147,22 +159,23 @@ def generate_data():
 
 # TODO: Implement this:
 def send_images():
-    used_images = []
+    used_images = [image["url"] for image in img_list]
     print("send_images called")
     while True:
         try:
-            for image in ASSETS.iterdir():
-                if image not in used_images:
+            for image in get_available_images():
+                if image["url"] not in used_images:
+                    print("Current used_images: ", used_images)
                     time.sleep(2)
-                    print(f"sending image: {image} with name: {image.name}")
+                    print(f"sending image with url: {image["url"]}")
 
-                    socketio.emit("new_image", {
-                        "url": f"./static/assets/{image.name}",
-                        "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
-                    }, namespace="/")
-                    used_images.append(image)
+                    socketio.emit("new_image", image, namespace="/")
+
+                    used_images.append(image["url"])
+                    img_list.append(image)
+
         except FileNotFoundError:
-            print("File not found at: ", ASSETS.absolute())
+            print("File not found at: ", IMAGES_DIR.absolute())
         
 
 @socketio.on("connect")
