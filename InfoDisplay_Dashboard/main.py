@@ -182,7 +182,7 @@ def send_images():
 def handle_connect():
     print("Client Connected")
 
-    
+
 
 @socketio.on("disconnect")
 def handle_disconnect():
