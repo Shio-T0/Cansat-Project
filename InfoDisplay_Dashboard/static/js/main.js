@@ -1,22 +1,65 @@
 
 const socket = io();
 
+const maxDataPoints = 30;
+
+let xData = []
+
+let yData1A = []
+let yData1B = []
+let yData2A = []
+let yData2B = []
+
+localStorage.removeItem("xData");
+
+localStorage.removeItem("yData1A");
+localStorage.removeItem("yData1B");
+localStorage.removeItem("yData2A");
+localStorage.removeItem("yData2B");
+
+
+if (localStorage.getItem('xData')) {
+    xData = JSON.parse(localStorage.getItem('xData')) || [];
+
+    yData1A = JSON.parse(localStorage.getItem('yData1A')) || [];
+    yData1B = JSON.parse(localStorage.getItem('yData1B')) || [];
+    yData2A = JSON.parse(localStorage.getItem('yData2A')) || [];
+    yData2B = JSON.parse(localStorage.getItem('yData2B')) || []; 
+}
+
+function updateCurrentData(data) {
+    console.log("New data Triggered");
+    console.log("Received data: ", data);
+
+    xData.push(data.x);
+
+    yData1A.push(data.y1a);
+    yData1B.push(data.y1b);
+    yData2A.push(data.y2a);
+    yData2B.push(data.y2b);
+
+    if (xData.length > maxDataPoints) {
+        xData.shift();
+
+        yData1A.shift();
+        yData1B.shift();
+        yData2A.shift();
+        yData2B.shift();
+    }
+
+    localStorage.setItem('xData', JSON.stringify(xData));
+
+    localStorage.setItem('yData1A', JSON.stringify(yData1A));
+    localStorage.setItem('yData1B', JSON.stringify(yData1B));
+    localStorage.setItem('yData2A', JSON.stringify(yData2A));
+    localStorage.setItem('yData2B', JSON.stringify(yData2B));
+}
+
 if (window.location.pathname === "/charts") {
     const plotContainer1A = document.getElementById('graph-1a');
     const plotContainer1B = document.getElementById('graph-1b');
     const plotContainer2A = document.getElementById('graph-2a');
     const plotContainer2B = document.getElementById('graph-2b');
-
-    const maxDataPoints = 30
-
-    let xData = []
-
-    let yData1A = []
-    let yData1B = []
-    let yData2A = []
-    let yData2B = []
-
-
 
     const initialData = [{
         x: xData,
@@ -69,23 +112,9 @@ if (window.location.pathname === "/charts") {
     })
 
     socket.on("new_data", (data) => {
-        console.log("New data Triggered");
-        console.log("Received data: ", data);
-        xData.push(data.x);
-
-        yData1A.push(data.y1a);
-        yData1B.push(data.y1b);
-        yData2A.push(data.y2a);
-        yData2B.push(data.y2b);
         
-        if (xData.length > maxDataPoints) {
-            xData.shift();
 
-            yData1A.shift();
-            yData1B.shift();
-            yData2A.shift();
-            yData2B.shift();
-        }
+        updateCurrentData(data);
 
         Plotly.update(plotContainer1A, {
             x: [xData],
@@ -161,5 +190,9 @@ else if (window.location.pathname === "/image-display") {
             <div class="timestamp">${image.timestamp || '00:00:00.000'}</div>
         `;
         grid.appendChild(frame);
+    });
+
+    socket.on("new_data", (data) => {
+        updateCurrentData(data);
     });
 }
