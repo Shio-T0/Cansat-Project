@@ -10,14 +10,6 @@ let yData1B = []
 let yData2A = []
 let yData2B = []
 
-localStorage.removeItem("xData");
-
-localStorage.removeItem("yData1A");
-localStorage.removeItem("yData1B");
-localStorage.removeItem("yData2A");
-localStorage.removeItem("yData2B");
-
-
 if (localStorage.getItem('xData')) {
     xData = JSON.parse(localStorage.getItem('xData')) || [];
 
