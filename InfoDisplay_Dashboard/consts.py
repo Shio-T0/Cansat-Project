@@ -1,0 +1,3 @@
+SERIAL_PATH = "/dev/ttyACM0"
+
+PORT = 4000

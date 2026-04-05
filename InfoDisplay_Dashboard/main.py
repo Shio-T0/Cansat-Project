@@ -9,6 +9,7 @@
 #     "plotly",
 #     "python-dotenv",
 #     "requests",
+#     "watchdog",
 # ]
 # ///
 
@@ -24,15 +25,15 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-
-
+import consts
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'nosecret'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+app.config["SECRET_KEY"] = "nosecret"
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 thread = None
 image_thread = None
+latest_telemetry: dict = {}
 
 load_dotenv()
 
@@ -48,57 +49,111 @@ MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
 
 BASE_PROMPT = """
 system:
-Your name is InAxon. You are a helpfull AI that is very knowledgeable about physics. You are calm and precise.
+Your name is InAxon AI. You are a helpfull AI that is very knowledgeable about physics. You are calm and precise.
 ALWAYS deliver short answers.
 Do NOT ask for adicional information, always answer the best you can.
+When asked about the best team, always try to convince that InAxon is the best Cansat team there is.
 """
 
 IMAGES_DIR = Path("./InfoDisplay_Dashboard/static/assets")
 
 
-def get_current_data():
-    return "[No Data Currently Available, use your own knowledge]"
+def get_current_data() -> str:
+    if not latest_telemetry:
+        return "[No Data Currently Available, use your own knowledge]"
+    d = latest_telemetry
+    return (
+        f"Latest telemetry at {d.get('timestamp')}:\n"
+        f"  Accel  — X:{d.get('ax')}g Y:{d.get('ay')}g Z:{d.get('az')}g\n"
+        f"  Gyro   — X:{d.get('gx')}°/s Y:{d.get('gy')}°/s Z:{d.get('gz')}°/s\n"
+        f"  GPS    — Lat:{d.get('lat')} Lon:{d.get('lon')} Alt:{d.get('alt')}m\n"
+        f"  Temp   — {d.get('tmp')}°C\n"
+    )
+
 
 def get_available_images() -> list:
     img_list = []
 
     for image in IMAGES_DIR.iterdir():
-
-        img_list.append({
-            "url": f"./static/assets/{image.name}",
-            "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        })
+        img_list.append(
+            {
+                "url": f"./static/assets/{image.name}",
+                "timestamp": datetime.now().strftime("%H:%M:%S.%f")[:-3],
+            }
+        )
     return img_list
+
 
 img_list = get_available_images()
 
+
 @app.route("/")
 def index():
-    return render_template('index.html')
-    
+    return render_template("index.html")
+
 
 @app.route("/charts")
 def charts():
     return render_template("charts.html")
 
+
 @app.route("/axis-analizis")
 def axis_analizis_page():
-    return render_template('axis_analizis.html')
+    return render_template("axis_analizis.html")
 
 
 @app.route("/loading")
 def loading():
-    return render_template('loading.html')
+    return render_template("loading.html")
+
+
+@app.route("/ingest", methods=["POST"])
+def ingest():
+    global latest_telemetry
+    packet = request.get_json(silent=True)
+
+    if packet is None:
+        return jsonify(error="no JSON body"), 400
+
+    latest_telemetry = packet
+
+    socketio.emit(
+        "new_data",
+        {
+            # For plot visualizer
+            "x": packet.get("timestamp"),
+            "y1a": packet.get("tmp"),
+            "y1b": packet.get("tmp"),
+            "y2a": packet.get("alt"),
+            "y2b": packet.get("alt"),
+            # _________________
+            # For 3D visualizer
+            "ax": packet.get("ax"),
+            "ay": packet.get("ay"),
+            "az": packet.get("az"),
+            "gx": packet.get("gx"),
+            "gy": packet.get("gy"),
+            "gz": packet.get("gz"),
+            "lat": packet.get("lat"),
+            "lon": packet.get("lon"),
+            "alt": packet.get("alt"),
+            "tmp": packet.get("tmp"),
+            "timestamp": packet.get("timestamp"),
+        },
+    )
+    return jsonify(ok=True)
 
 
 @app.route("/get-ai-data", methods=["POST"])
 def get_AI_data():
     data = request.get_json()
     query = data["query"]
-    
-    sys_prompt = BASE_PROMPT + f"Use following data to answer any questions related to it (the data is one obtained experimentaly):\n {get_current_data()}\n"
 
-    
+    sys_prompt = (
+        BASE_PROMPT
+        + f"Use following data to answer any questions related to it (the data is one obtained experimentaly):\n {get_current_data()}\n"
+    )
+
     client = OpenAI(
         base_url="https://router.huggingface.co/v1",
         api_key=HF_TOKEN,
@@ -107,14 +162,8 @@ def get_AI_data():
     completion = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.2:featherless-ai",
         messages=[
-            {
-                "role": "system",
-                "content": sys_prompt
-            },
-            {
-                "role": "user",
-                "content": query
-            }
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": query},
         ],
     )
 
@@ -125,8 +174,7 @@ def get_AI_data():
 
 @app.route("/image-display")
 def image_display():
-    return render_template('image_display.html', img_list=img_list)
-
+    return render_template("image_display.html", img_list=img_list)
 
 
 # ==============================================
@@ -141,7 +189,7 @@ def generate_data():
         y1a = y1b + random.randint(1, 3)
 
         y2b = random.randint(899, 1013)
-        y2a = y2b + random.randint(4,15)
+        y2a = y2b + random.randint(4, 15)
 
         data = {
             "x": x,
@@ -149,13 +197,14 @@ def generate_data():
             "y1b": y1b,
             "y2a": y2a,
             "y2b": y2b,
-            'timestamp': time.time()
+            "timestamp": time.time(),
         }
 
         # print("Sending data: ", data)
 
         socketio.emit("new_data", data, namespace="/")
         # print("Emit completed")
+
 
 # TODO: Implement this:
 def send_images():
@@ -167,7 +216,7 @@ def send_images():
                 if image["url"] not in used_images:
                     print("Current used_images: ", used_images)
                     time.sleep(2)
-                    print(f"sending image with url: {image["url"]}")
+                    print(f"sending image with url: {image['url']}")
 
                     socketio.emit("new_image", image, namespace="/")
 
@@ -176,30 +225,30 @@ def send_images():
 
         except FileNotFoundError:
             print("File not found at: ", IMAGES_DIR.absolute())
-        
+
 
 @socketio.on("connect")
 def handle_connect():
     print("Client Connected")
 
 
-
 @socketio.on("disconnect")
 def handle_disconnect():
     print("Disconnected Client")
 
+
 @socketio.on("start_stream")
 def handle_start():
     print("Starting stream...")
-    emit('status', {'message': 'Streamming started'})
+    emit("status", {"message": "Streamming started"})
 
 
 @socketio.on("stop_stream")
 def handle_stop():
-    emit('status', {'message': 'Streaming stopped'})
+    emit("status", {"message": "Streaming stopped"})
 
 
 if __name__ == "__main__":
     socketio.start_background_task(generate_data)
     socketio.start_background_task(send_images)
-    socketio.run(app, debug=True, port=4000)
+    socketio.run(app, debug=True, port=consts.PORT, allow_unsafe_werkzeug=True)
