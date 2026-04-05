@@ -1,190 +1,225 @@
-
 const socket = io();
+
+let lastPacketTime = null;
 
 const maxDataPoints = 30;
 
-let xData = []
+let xData = [];
 
-let yData1A = []
-let yData1B = []
-let yData2A = []
-let yData2B = []
+let yData1A = [];
+let yData1B = [];
+let yData2A = [];
+let yData2B = [];
 
-if (localStorage.getItem('xData')) {
-    xData = JSON.parse(localStorage.getItem('xData')) || [];
+if (localStorage.getItem("xData")) {
+  xData = JSON.parse(localStorage.getItem("xData")) || [];
 
-    yData1A = JSON.parse(localStorage.getItem('yData1A')) || [];
-    yData1B = JSON.parse(localStorage.getItem('yData1B')) || [];
-    yData2A = JSON.parse(localStorage.getItem('yData2A')) || [];
-    yData2B = JSON.parse(localStorage.getItem('yData2B')) || []; 
+  yData1A = JSON.parse(localStorage.getItem("yData1A")) || [];
+  yData1B = JSON.parse(localStorage.getItem("yData1B")) || [];
+  yData2A = JSON.parse(localStorage.getItem("yData2A")) || [];
+  yData2B = JSON.parse(localStorage.getItem("yData2B")) || [];
 }
 
 function updateCurrentData(data) {
-    console.log("New data Triggered");
-    console.log("Received data: ", data);
+  console.log("New data Triggered");
+  console.log("Received data: ", data);
 
-    xData.push(data.x);
+  xData.push(data.x);
 
-    yData1A.push(data.y1a);
-    yData1B.push(data.y1b);
-    yData2A.push(data.y2a);
-    yData2B.push(data.y2b);
+  yData1A.push(data.y1a);
+  yData1B.push(data.y1b);
+  yData2A.push(data.y2a);
+  yData2B.push(data.y2b);
 
-    if (xData.length > maxDataPoints) {
-        xData.shift();
+  if (xData.length > maxDataPoints) {
+    xData.shift();
 
-        yData1A.shift();
-        yData1B.shift();
-        yData2A.shift();
-        yData2B.shift();
-    }
+    yData1A.shift();
+    yData1B.shift();
+    yData2A.shift();
+    yData2B.shift();
+  }
 
-    localStorage.setItem('xData', JSON.stringify(xData));
+  localStorage.setItem("xData", JSON.stringify(xData));
 
-    localStorage.setItem('yData1A', JSON.stringify(yData1A));
-    localStorage.setItem('yData1B', JSON.stringify(yData1B));
-    localStorage.setItem('yData2A', JSON.stringify(yData2A));
-    localStorage.setItem('yData2B', JSON.stringify(yData2B));
+  localStorage.setItem("yData1A", JSON.stringify(yData1A));
+  localStorage.setItem("yData1B", JSON.stringify(yData1B));
+  localStorage.setItem("yData2A", JSON.stringify(yData2A));
+  localStorage.setItem("yData2B", JSON.stringify(yData2B));
 }
 
 if (window.location.pathname === "/charts") {
-    const plotContainer1A = document.getElementById('graph-1a');
-    const plotContainer1B = document.getElementById('graph-1b');
-    const plotContainer2A = document.getElementById('graph-2a');
-    const plotContainer2B = document.getElementById('graph-2b');
+  const plotContainer1A = document.getElementById("graph-1a");
+  const plotContainer1B = document.getElementById("graph-1b");
+  const plotContainer2A = document.getElementById("graph-2a");
+  const plotContainer2B = document.getElementById("graph-2b");
 
-    const initialData = [{
-        x: xData,
-        y: yData1A,
-        mode: 'lines+markers',
-        name: 'Live Stream',
-        line: { color: '#4f46e5', width: 3, shape: 'spline' },
-        marker: { size: 8, color: '#3778f0ff', opacity: 1 },
-        fill: 'tozeroy',
-        fillcolor: 'rgba(79, 70, 229, 0.1)'
-    }];
+  const initialData = [
+    {
+      x: xData,
+      y: yData1A,
+      mode: "lines+markers",
+      name: "Live Stream",
+      line: { color: "#4f46e5", width: 3, shape: "spline" },
+      marker: { size: 8, color: "#3778f0ff", opacity: 1 },
+      fill: "tozeroy",
+      fillcolor: "rgba(79, 70, 229, 0.1)",
+    },
+  ];
 
-    const layout = {
-        autosize: true,
-        margin: { l: 15, r: 15, t: 10, b: 15 },
-        xaxis: { title: 'Timestamp', gridcolor: '#f3f4f677', zeroline: false },
-        yaxis: { title: 'Value', gridcolor: '#f3f4f677', zeroline: false },
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        hovermode: 'x unified',
-        hoverlabel: {
-            bgcolor: "#1e1e1e5a",
-            font: {color: "#fff"}
-        }
-    };
+  const layout = {
+    autosize: true,
+    margin: { l: 15, r: 15, t: 10, b: 15 },
+    xaxis: { title: "Timestamp", gridcolor: "#f3f4f677", zeroline: false },
+    yaxis: { title: "Value", gridcolor: "#f3f4f677", zeroline: false },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    hovermode: "x unified",
+    hoverlabel: {
+      bgcolor: "#1e1e1e5a",
+      font: { color: "#fff" },
+    },
+  };
 
-    const config = { responsive: true, displayModeBar: false };
-    Plotly.newPlot(plotContainer1A, initialData, layout, config);
-    Plotly.newPlot(plotContainer1B, initialData, layout, config);
-    Plotly.newPlot(plotContainer2A, initialData, layout, config);
-    Plotly.newPlot(plotContainer2B, initialData, layout, config);
+  const config = { responsive: true, displayModeBar: false };
+  Plotly.newPlot(plotContainer1A, initialData, layout, config);
+  Plotly.newPlot(plotContainer1B, initialData, layout, config);
+  Plotly.newPlot(plotContainer2A, initialData, layout, config);
+  Plotly.newPlot(plotContainer2B, initialData, layout, config);
 
-    // ================
-    // SOCKET HANDLING
-    // ================
+  // ================
+  // SOCKET HANDLING
+  // ================
 
+  let statusButton = document.getElementById("backendStatus");
+  let deviationContainer1 = document.getElementById("deviation1");
+  let deviationContainer2 = document.getElementById("deviation2");
 
-    let statusButton = document.getElementById("backendStatus");
-    let deviationContainer1 = document.getElementById("deviation1");
-    let deviationContainer2 = document.getElementById("deviation2");
+  socket.on("connect", () => {
+    console.log("Connected to Backend");
+    console.log("Socket ID:", socket.id);
+    statusButton.textContent = "● Link Ativado e funcional";
+  });
+  socket.on("disconnect", () => {
+    console.log("Backend Disconnected");
+    statusButton.textContent = "● Link não operacional";
+  });
 
-    socket.on("connect", () => {
-        console.log("Connected to Backend");
-        console.log('Socket ID:', socket.id);
-        statusButton.textContent = "● Link Ativado e funcional";
-    })
-    socket.on("disconnect", () => {
-        console.log("Backend Disconnected");
-        statusButton.textContent = "● Link não operacional";
-    })
+  socket.on("new_data", (data) => {
+    updateCurrentData(data);
 
-    socket.on("new_data", (data) => {
-        
+    Plotly.update(
+      plotContainer1A,
+      {
+        x: [xData],
+        y: [yData1A],
+      },
+      {},
+      [0],
+    );
+    Plotly.update(
+      plotContainer1B,
+      {
+        x: [xData],
+        y: [yData1B],
+      },
+      {},
+      [0],
+    );
+    Plotly.update(
+      plotContainer2A,
+      {
+        x: [xData],
+        y: [yData2A],
+      },
+      {},
+      [0],
+    );
+    Plotly.update(
+      plotContainer2B,
+      {
+        x: [xData],
+        y: [yData2B],
+      },
+      {},
+      [0],
+    );
 
-        updateCurrentData(data);
+    let maxDeviation1 = 0;
+    let maxDeviation2 = 0;
 
-        Plotly.update(plotContainer1A, {
-            x: [xData],
-            y: [yData1A]
-        }, {}, [0]);
-        Plotly.update(plotContainer1B, {
-            x: [xData],
-            y: [yData1B]
-        }, {}, [0]);
-        Plotly.update(plotContainer2A, {
-            x: [xData],
-            y: [yData2A]
-        }, {}, [0]);
-        Plotly.update(plotContainer2B, {
-            x: [xData],
-            y: [yData2B]
-        }, {}, [0]);
-
-
-        let maxDeviation1 = 0;
-        let maxDeviation2 = 0;
-
-        if (data.y1b != 0 || data.y2b != 0) {
-            maxDeviation1 = (Math.abs(data.y1b - data.y1a) / data.y1b) * 100
-            maxDeviation2 = (Math.abs(data.y2b - data.y2a) / data.y2b) * 100
-        }
-        
-        console.log("Dev1: ", maxDeviation1)
-        console.log("Dev2: ", maxDeviation2)
-
-        if (+deviationContainer1.textContent < maxDeviation1) {
-            deviationContainer1.textContent = maxDeviation1.toFixed(2)
-        }
-        if (+deviationContainer2.textContent < maxDeviation2) {
-            deviationContainer2.textContent = maxDeviation2.toFixed(2)
-        }
-
-    });
-
-    statusButton.addEventListener('click', () => {
-        console.log("Pressed, emiting");
-        socket.emit('start_stream');
-        console.log("finished emiting");
-    });
-    statusButton.addEventListener('dblclick', () => {
-        socket.emit('stop_stream');
-    });
-
-    socket.on("status", (msg) => {
-        console.log("Status: ", msg.message);
-    });
-
-    
-    currentImageHolder = document.getElementById("currentImage");
-    const lastImage = localStorage.getItem('lastImage');
-    if (lastImage) {
-        currentImageHolder.setAttribute('src', lastImage);
+    if (data.y1b != 0 || data.y2b != 0) {
+      maxDeviation1 = (Math.abs(data.y1b - data.y1a) / data.y1b) * 100;
+      maxDeviation2 = (Math.abs(data.y2b - data.y2a) / data.y2b) * 100;
     }
 
-    socket.on("new_image", (image) => {
-        currentImageHolder.setAttribute('src', `${image.url}`);
-        
-        localStorage.setItem('lastImage', `${image.url}`);
-    });
-}
-else if (window.location.pathname === "/image-display") {
-    socket.on("new_image", (image) => {
-        const frame = document.createElement('div');
-        frame.className = 'image-frame';
-        console.log("Got image in js: ", image.url)
-        frame.innerHTML = `
-            <img src="${image.url}" loading="lazy">
-            <div class="timestamp">${image.timestamp || '00:00:00.000'}</div>
-        `;
-        grid.appendChild(frame);
-    });
+    console.log("Dev1: ", maxDeviation1);
+    console.log("Dev2: ", maxDeviation2);
 
-    socket.on("new_data", (data) => {
-        updateCurrentData(data);
-    });
+    if (+deviationContainer1.textContent < maxDeviation1) {
+      deviationContainer1.textContent = maxDeviation1.toFixed(2);
+    }
+    if (+deviationContainer2.textContent < maxDeviation2) {
+      deviationContainer2.textContent = maxDeviation2.toFixed(2);
+    }
+
+    // Altitude
+    if (data.alt !== undefined) {
+      document.getElementById("stat-alt").textContent = data.alt.toFixed(1);
+    }
+
+    // Coordinates (5 decimal places ≈ 1m precision)
+    if (data.lat !== undefined && data.lon !== undefined) {
+      document.getElementById("stat-lat").textContent = data.lat.toFixed(5);
+      document.getElementById("stat-lon").textContent = data.lon.toFixed(5);
+    }
+
+    // Data rate: ms since last packet
+    const now = performance.now();
+    if (lastPacketTime !== null) {
+      const rate = (now - lastPacketTime).toFixed(0);
+      document.getElementById("stat-rate").textContent = rate;
+    }
+    lastPacketTime = now;
+  });
+
+  statusButton.addEventListener("click", () => {
+    console.log("Pressed, emiting");
+    socket.emit("start_stream");
+    console.log("finished emiting");
+  });
+  statusButton.addEventListener("dblclick", () => {
+    socket.emit("stop_stream");
+  });
+
+  socket.on("status", (msg) => {
+    console.log("Status: ", msg.message);
+  });
+
+  currentImageHolder = document.getElementById("currentImage");
+  const lastImage = localStorage.getItem("lastImage");
+  if (lastImage) {
+    currentImageHolder.setAttribute("src", lastImage);
+  }
+
+  socket.on("new_image", (image) => {
+    currentImageHolder.setAttribute("src", `${image.url}`);
+
+    localStorage.setItem("lastImage", `${image.url}`);
+  });
+} else if (window.location.pathname === "/image-display") {
+  socket.on("new_image", (image) => {
+    const frame = document.createElement("div");
+    frame.className = "image-frame";
+    console.log("Got image in js: ", image.url);
+    frame.innerHTML = `
+            <img src="${image.url}" loading="lazy">
+            <div class="timestamp">${image.timestamp || "00:00:00.000"}</div>
+        `;
+    grid.appendChild(frame);
+  });
+
+  socket.on("new_data", (data) => {
+    updateCurrentData(data);
+  });
 }

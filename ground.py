@@ -29,7 +29,20 @@ logging.basicConfig(
 )
 log = logging.getLogger("ground")
 
-FIELDS = ["timestamp", "ax", "ay", "az", "gx", "gy", "gz", "lat", "lon", "alt", "tmp"]
+FIELDS = [
+    "timestamp",
+    "ax",
+    "ay",
+    "az",
+    "gx",
+    "gy",
+    "gz",
+    "lat",
+    "lon",
+    "alt",
+    "tmp",
+    "prs",
+]
 
 
 # ======================
@@ -59,6 +72,8 @@ class CSVLogger:
 # ======================
 def main():
     logger = CSVLogger()
+
+    log.info("Opening %s at %d baud...", SERIAL_PORT, BAUD_RATE)
     try:
         ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2)
     except serial.SerialException as e:

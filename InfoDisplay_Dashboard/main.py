@@ -41,6 +41,11 @@ load_dotenv()
 # =======
 # Consts
 # =======
+_T0 = 288.15  # K  — sea-level temperature
+_P0 = 1013.25  # hPa — sea-level pressure
+_L = 0.0065  # K/m — tropospheric lapse rate
+_EXP = 5.2561  # g*M / (R*L) — pressure exponent
+
 HF_TOKEN = os.environ["HF_KEY"]
 if HF_TOKEN is None:
     raise RuntimeError("Hugging Face Key not found")
@@ -87,6 +92,17 @@ def get_available_images() -> list:
 img_list = get_available_images()
 
 
+def isa_temperature(alt_m: float) -> float:
+    """Expected temperature in °C at alt_m metres above sea level."""
+    return (_T0 - _L * alt_m) - 273.15
+
+
+def isa_pressure(alt_m: float) -> float:
+    """Expected pressure in hPa at alt_m metres above sea level."""
+    T = _T0 - _L * alt_m
+    return _P0 * (T / _T0) ** _EXP
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -117,17 +133,18 @@ def ingest():
 
     latest_telemetry = packet
 
+    alt = packet.get("alt", 0.0)
+
     socketio.emit(
         "new_data",
         {
-            # For plot visualizer
+            # Graph fields
             "x": packet.get("timestamp"),
-            "y1a": packet.get("tmp"),
-            "y1b": packet.get("tmp"),
-            "y2a": packet.get("alt"),
-            "y2b": packet.get("alt"),
-            # _________________
-            # For 3D visualizer
+            "y1a": packet.get("tmp"),  # measured temperature
+            "y1b": round(isa_temperature(alt), 2),  # ISA expected temperature
+            "y2a": packet.get("prs"),  # measured pressure
+            "y2b": round(isa_pressure(alt), 2),  # ISA expected pressure
+            # Raw IMU + GPS fields for stats bar and 3D viewer
             "ax": packet.get("ax"),
             "ay": packet.get("ay"),
             "az": packet.get("az"),
@@ -138,9 +155,11 @@ def ingest():
             "lon": packet.get("lon"),
             "alt": packet.get("alt"),
             "tmp": packet.get("tmp"),
+            "prs": packet.get("prs"),
             "timestamp": packet.get("timestamp"),
         },
     )
+
     return jsonify(ok=True)
 
 
