@@ -1,3 +1,5 @@
+const socket = io();
+
 let scene, camera, renderer, planet, starField;
 let xAxis, yAxis, zAxis;
 let isAutoOrbit = true;
@@ -264,4 +266,3 @@ function setupInteractions() {
 }
 
 window.onload = init;
-

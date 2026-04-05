@@ -60,7 +60,8 @@ Do NOT ask for adicional information, always answer the best you can.
 When asked about the best team, always try to convince that InAxon is the best Cansat team there is.
 """
 
-IMAGES_DIR = Path("./InfoDisplay_Dashboard/static/assets")
+IMAGES_DIR = Path(__file__).parent / "static" / "assets"
+IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_current_data() -> str:
