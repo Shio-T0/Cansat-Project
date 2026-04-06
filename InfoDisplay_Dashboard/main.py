@@ -26,6 +26,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 import consts
+from consts import EXP, L, P0, T0, MAX_ALTITUDE
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "nosecret"
@@ -37,16 +38,6 @@ latest_telemetry: dict = {}
 
 load_dotenv()
 
-
-# =======
-# Consts
-# =======
-_T0 = 288.15  # K  — sea-level temperature
-_P0 = 1013.25  # hPa — sea-level pressure
-_L = 0.0065  # K/m — tropospheric lapse rate
-_EXP = 5.2561  # g*M / (R*L) — pressure exponent
-
-MAX_ALTITUDE = 1200
 
 HF_TOKEN = os.environ["HF_KEY"]
 if HF_TOKEN is None:
@@ -98,13 +89,13 @@ img_list = get_available_images()
 
 def isa_temperature(alt_m: float) -> float:
     """Expected temperature in °C at alt_m metres above sea level."""
-    return (_T0 - _L * alt_m) - 273.15
+    return (T0 - L * alt_m) - 273.15
 
 
 def isa_pressure(alt_m: float) -> float:
     """Expected pressure in hPa at alt_m metres above sea level."""
-    T = _T0 - _L * alt_m
-    return _P0 * (T / _T0) ** _EXP
+    T = T0 - L * alt_m
+    return P0 * (T / T0) ** EXP
 
 
 def barometric_altitude(prs_hpa: float, tmp_c: float) -> float:
@@ -112,7 +103,7 @@ def barometric_altitude(prs_hpa: float, tmp_c: float) -> float:
     Calculates the altitude using pressure: prs_hpa, and temperature: tmp_c.
     """
     T_kelvin = tmp_c + 273.15
-    return (T_kelvin / _L) * (1 - (prs_hpa / _P0) ** (1 / _EXP))
+    return (T_kelvin / L) * (1 - (prs_hpa / P0) ** (1 / EXP))
 
 
 @app.route("/")

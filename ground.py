@@ -57,7 +57,7 @@ class CSVLogger:
             self._file, fieldnames=FIELDS, extrasaction="ignore"
         )
         self._writer.writeheader
-        log.info("Logging to %s", filename)
+        log.info("Logging to ", filename)
 
     def write(self, packet: dict) -> None:
         self._writer.writerow(packet)
@@ -73,11 +73,11 @@ class CSVLogger:
 def main():
     logger = CSVLogger()
 
-    log.info("Opening %s at %d baud...", SERIAL_PORT, BAUD_RATE)
+    log.info(f"Opening {SERIAL_PORT} at {BAUD_RATE} baud...")
     try:
         ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2)
     except serial.SerialException as e:
-        log.error("Could not open serial port: %s", e)
+        log.error("Could not open serial port: ", e)
         return
 
     log.info("Listening... Ctrl+C to close")
@@ -89,7 +89,7 @@ def main():
                 raw = ser.readline().decode("ascii", errors="replace").strip()
 
             except serial.SerialException as e:
-                log.error("Serial read error: %s", e)
+                log.error("Serial read error: ", e)
                 continue
 
             if not raw:
@@ -99,7 +99,7 @@ def main():
                 packet = json.loads(raw)
             except json.JSONDecodeError as e:
                 failed += 1
-                log.error("Could not decode json: %s", e)
+                log.error("Could not decode json: ", e)
                 continue
 
             packet["timestamp"] = datetime.now().strftime("%H:%M:%S.%f")[:-3]
@@ -120,7 +120,7 @@ def main():
                 log.error("Dashboard unreachable")
 
     except KeyboardInterrupt:
-        log.info("Stopped. %d received, %d failed", received, failed)
+        log.info(f"Stopped. {received} received, {failed} failed")
 
     finally:
         ser.close()
