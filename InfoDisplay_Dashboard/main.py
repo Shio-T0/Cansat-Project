@@ -46,6 +46,8 @@ _P0 = 1013.25  # hPa — sea-level pressure
 _L = 0.0065  # K/m — tropospheric lapse rate
 _EXP = 5.2561  # g*M / (R*L) — pressure exponent
 
+MAX_ALTITUDE = 1200
+
 HF_TOKEN = os.environ["HF_KEY"]
 if HF_TOKEN is None:
     raise RuntimeError("Hugging Face Key not found")
@@ -73,6 +75,7 @@ def get_current_data() -> str:
         f"  Accel  — X:{d.get('ax')}g Y:{d.get('ay')}g Z:{d.get('az')}g\n"
         f"  Gyro   — X:{d.get('gx')}°/s Y:{d.get('gy')}°/s Z:{d.get('gz')}°/s\n"
         f"  GPS    — Lat:{d.get('lat')} Lon:{d.get('lon')} Alt:{d.get('alt')}m\n"
+        f"  Baro Alt    — Computed Alt:{d.get('computed_alt')}m (above sea level)\n"
         f"  Temp   — {d.get('tmp')}°C\n"
     )
 
@@ -102,6 +105,14 @@ def isa_pressure(alt_m: float) -> float:
     """Expected pressure in hPa at alt_m metres above sea level."""
     T = _T0 - _L * alt_m
     return _P0 * (T / _T0) ** _EXP
+
+
+def barometric_altitude(prs_hpa: float, tmp_c: float) -> float:
+    """
+    Calculates the altitude using pressure: prs_hpa, and temperature: tmp_c.
+    """
+    T_kelvin = tmp_c + 273.15
+    return (T_kelvin / _L) * (1 - (prs_hpa / _P0) ** (1 / _EXP))
 
 
 @app.route("/")
@@ -134,7 +145,17 @@ def ingest():
 
     latest_telemetry = packet
 
-    alt = packet.get("alt", 0.0)
+    prs = packet.get("prs", 0.0)
+    tmp = packet.get("tmp", 0.0)
+
+    if prs is not None and tmp is not None:
+        alt = round(barometric_altitude(prs, tmp), 1)
+    else:
+        # Fallback to GPS altitude
+        alt = packet.get("alt", 0.0)
+    alt_display = MAX_ALTITUDE - alt
+
+    packet["computed_alt"] = alt
 
     socketio.emit(
         "new_data",
@@ -154,7 +175,7 @@ def ingest():
             "gz": packet.get("gz"),
             "lat": packet.get("lat"),
             "lon": packet.get("lon"),
-            "alt": packet.get("alt"),
+            "alt": alt_display,
             "tmp": packet.get("tmp"),
             "prs": packet.get("prs"),
             "timestamp": packet.get("timestamp"),
