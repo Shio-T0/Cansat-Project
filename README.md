@@ -82,7 +82,7 @@ CansatProject/
 | BMP388 | I²C (0x77) | Pressure + temperature |
 | APC220 RF module | USB-serial `/dev/ttyUSB0` | Telemetry downlink |
 | 28BYJ-48 + ULN2003 | GPIO 17,27,22,23 (BCM) | Attitude correction |
-| Passive buzzer | GPIO 18 (PWM) | Startup beep + Mario recovery theme |
+| Passive buzzer | GPIO 21 | Startup beep + Mario recovery theme |
 | Pi Camera v2.1 | CSI (15-to-22-pin adapter) | Images saved to SD card |
 | LiPo + PowerBoost 1000C | — | Power |
 
