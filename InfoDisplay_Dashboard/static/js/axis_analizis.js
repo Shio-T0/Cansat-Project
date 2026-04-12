@@ -113,27 +113,13 @@ function init() {
   const canHeight = 2.8;
 
   const geo = new THREE.CylinderGeometry(canRadius, canRadius, canHeight, 32);
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0x111111,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.3,
-  });
-  planet = new THREE.Mesh(geo, mat);
-
-  // Core Cylinder
-  const coreGeo = new THREE.CylinderGeometry(canRadius - 0.05, canRadius - 0.05, canHeight - 0.1, 32);
-  const coreMat = new THREE.MeshPhongMaterial({
+  const mat = new THREE.MeshPhongMaterial({
     color: 0x0a0a1a,
     emissive: 0x112244,
     shininess: 100,
   });
-  const core = new THREE.Mesh(coreGeo, coreMat);
-
-  const canGroup = new THREE.Group();
-  canGroup.add(planet);
-  canGroup.add(core);
-  scene.add(canGroup);
+  planet = new THREE.Mesh(geo, mat);
+  scene.add(planet);
 
   // Vector Axes
   const createVector = (color) => {
