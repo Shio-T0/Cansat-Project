@@ -108,10 +108,11 @@ function init() {
   blueLight.position.set(-5, -2, 2);
   scene.add(blueLight);
 
-  // Procedural Planet
-  const planetGroup = new THREE.Group();
+  // Can Model (cylinder with ~2:1 height-to-diameter ratio)
+  const canRadius = 0.9;
+  const canHeight = 2.8;
 
-  const geo = new THREE.IcosahedronGeometry(2, 15);
+  const geo = new THREE.CylinderGeometry(canRadius, canRadius, canHeight, 32);
   const mat = new THREE.MeshStandardMaterial({
     color: 0x111111,
     wireframe: true,
@@ -120,8 +121,8 @@ function init() {
   });
   planet = new THREE.Mesh(geo, mat);
 
-  // Core Sphere
-  const coreGeo = new THREE.SphereGeometry(1.8, 32, 32);
+  // Core Cylinder
+  const coreGeo = new THREE.CylinderGeometry(canRadius - 0.05, canRadius - 0.05, canHeight - 0.1, 32);
   const coreMat = new THREE.MeshPhongMaterial({
     color: 0x0a0a1a,
     emissive: 0x112244,
@@ -129,9 +130,10 @@ function init() {
   });
   const core = new THREE.Mesh(coreGeo, coreMat);
 
-  planetGroup.add(planet);
-  planetGroup.add(core);
-  scene.add(planetGroup);
+  const canGroup = new THREE.Group();
+  canGroup.add(planet);
+  canGroup.add(core);
+  scene.add(canGroup);
 
   // Vector Axes
   const createVector = (color) => {
