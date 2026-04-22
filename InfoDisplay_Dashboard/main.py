@@ -65,7 +65,6 @@ def get_current_data() -> str:
         f"Latest telemetry at {d.get('timestamp')}:\n"
         f"  Accel  — X:{d.get('ax')}g Y:{d.get('ay')}g Z:{d.get('az')}g\n"
         f"  Gyro   — X:{d.get('gx')}°/s Y:{d.get('gy')}°/s Z:{d.get('gz')}°/s\n"
-        f"  GPS    — Lat:{d.get('lat')} Lon:{d.get('lon')} Alt:{d.get('alt')}m\n"
         f"  Baro Alt    — Computed Alt:{d.get('computed_alt')}m (above sea level)\n"
         f"  Temp   — {d.get('tmp')}°C\n"
     )
@@ -139,11 +138,7 @@ def ingest():
     prs = packet.get("prs", 0.0)
     tmp = packet.get("tmp", 0.0)
 
-    if prs is not None and tmp is not None:
-        alt = round(barometric_altitude(prs, tmp), 1)
-    else:
-        # Fallback to GPS altitude
-        alt = packet.get("alt", 0.0)
+    alt = round(barometric_altitude(prs, tmp), 1)
     alt_display = MAX_ALTITUDE - alt
 
     packet["computed_alt"] = alt
@@ -157,15 +152,13 @@ def ingest():
             "y1b": round(isa_temperature(alt), 2),  # ISA expected temperature
             "y2a": packet.get("prs"),  # measured pressure
             "y2b": round(isa_pressure(alt), 2),  # ISA expected pressure
-            # Raw IMU + GPS fields for stats bar and 3D viewer
+            # Raw IMU fields for stats bar and 3D viewer
             "ax": packet.get("ax"),
             "ay": packet.get("ay"),
             "az": packet.get("az"),
             "gx": packet.get("gx"),
             "gy": packet.get("gy"),
             "gz": packet.get("gz"),
-            "lat": packet.get("lat"),
-            "lon": packet.get("lon"),
             "alt": alt_display,
             "tmp": packet.get("tmp"),
             "prs": packet.get("prs"),
