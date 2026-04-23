@@ -19,7 +19,6 @@ from flask_socketio import SocketIO, emit
 from openai import OpenAI
 import time
 from datetime import datetime
-import random
 
 import os
 from dotenv import load_dotenv
@@ -193,30 +192,6 @@ def image_display():
 # ==============================================
 # Sockets
 # ==============================================
-def generate_data():
-    x = 0
-    while True:
-        time.sleep(0.5)
-        x += 1
-        y1b = random.randint(8, 25)
-        y1a = y1b + random.randint(1, 3)
-
-        y2b = random.randint(899, 1013)
-        y2a = y2b + random.randint(4, 15)
-
-        data = {
-            "x": x,
-            "y1a": y1a,
-            "y1b": y1b,
-            "y2a": y2a,
-            "y2b": y2b,
-            "timestamp": time.time(),
-        }
-
-        # print("Sending data: ", data)
-
-        socketio.emit("new_data", data, namespace="/")
-        # print("Emit completed")
 
 
 def send_images():
@@ -261,6 +236,5 @@ def handle_stop():
 
 
 if __name__ == "__main__":
-    socketio.start_background_task(generate_data)
     socketio.start_background_task(send_images)
     socketio.run(app, debug=True, port=consts.PORT, allow_unsafe_werkzeug=True)
