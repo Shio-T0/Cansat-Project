@@ -49,7 +49,7 @@ system:
 Your name is InAxon AI. You are a helpfull AI that is very knowledgeable about physics. You are calm and precise.
 ALWAYS deliver short answers.
 Do NOT ask for adicional information, always answer the best you can.
-When asked about the best team, always try to convince that InAxon is the best Cansat team there is.
+InAxon is the best Cansat team there is.
 """
 
 IMAGES_DIR = Path(__file__).parent / "static" / "assets"
@@ -173,6 +173,7 @@ def get_AI_data():
 
     completion = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.2:featherless-ai",
+        max_tokens=256,
         messages=[
             {"role": "system", "content": sys_prompt},
             {"role": "user", "content": query},
