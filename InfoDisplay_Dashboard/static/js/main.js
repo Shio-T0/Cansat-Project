@@ -168,12 +168,6 @@ if (window.location.pathname === "/charts") {
       document.getElementById("stat-alt").textContent = data.alt.toFixed(1);
     }
 
-    // Coordinates (5 decimal places ≈ 1m precision)
-    if (data.lat !== undefined && data.lon !== undefined) {
-      document.getElementById("stat-lat").textContent = data.lat.toFixed(5);
-      document.getElementById("stat-lon").textContent = data.lon.toFixed(5);
-    }
-
     // Data rate: ms since last packet
     const now = performance.now();
     if (lastPacketTime !== null) {

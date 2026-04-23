@@ -18,7 +18,7 @@ from InfoDisplay_Dashboard.consts import EXP, L, P0
 # _____ Consts _____
 SERIAL_PORT = "/dev/ttyUSB0"
 BAUD_RATE = 9600
-DASHBOART_URL = "http://localhost:4000/ingest"
+DASHBOARD_URL = "http://localhost:4000/ingest"
 LOG_DIR = Path("./logs")
 
 # _____ Log _____
@@ -111,19 +111,19 @@ def main():
                 continue
 
             packet["timestamp"] = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            packet["alt"] = barometric_altitude(packet["prs"], packet["tmp"])
+
             log.info(
-                "[#%d] alt=%.1fm tmp=%.1f°C lat=%.5f lon=%.5f",
+                "[#%d] alt=%.1fm tmp=%.1f°C",
                 received,
                 packet.get("alt", 0),
                 packet.get("tmp", 0),
-                packet.get("lat", 0),
-                packet.get("lon", 0),
             )
 
             logger.write(packet)
 
             try:
-                requests.post(DASHBOART_URL, json=packet, timeout=0.5)
+                requests.post(DASHBOARD_URL, json=packet, timeout=0.5)
             except requests.exceptions.RequestException:
                 log.error("Dashboard unreachable")
 

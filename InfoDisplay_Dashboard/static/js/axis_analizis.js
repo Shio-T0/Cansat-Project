@@ -2,7 +2,6 @@ const socket = io();
 
 let scene, camera, renderer, planet, starField;
 let xAxis, yAxis, zAxis;
-let isAutoOrbit = true;
 const container = document.getElementById("canvas-container");
 
 const ALPHA = 0.98;
@@ -64,18 +63,7 @@ socket.on("new_data", (data) => {
     gy = data.gy;
 
   if (ax === undefined) return;
-
-  if (isAutoOrbit) {
-    isAutoOrbit = false;
-    console.log("[3D] Real IMU data received — switching to live mode");
-  }
-
-  clearTimeout(dataTimeoutHandle);
-  dataTimeoutHandle = setTimeout(() => {
-    isAutoOrbit = true;
-    lastTime = null;
-    console.log("[3D] No data for 3s — returning to auto-orbit");
-  }, DATA_TIMEOUT_MS);
+  console.log("[3D] Entering live mode")
 
   applyIMU(ax, ay, az, gx, gy);
 });
@@ -190,29 +178,6 @@ function updateUI(rx, ry, rz) {
 function animate() {
   requestAnimationFrame(animate);
 
-  if (isAutoOrbit) {
-    const time = Date.now() * 0.0005;
-    planet.rotation.y += 0.005;
-    planet.rotation.x += 0.002;
-
-    // Sync axes to a subtle movement or keep global
-    // Here we let them follow the planet rotation to show relative inclination
-    xAxis.rotation.x = planet.rotation.x;
-    xAxis.rotation.y = planet.rotation.y;
-
-    yAxis.rotation.x = planet.rotation.x;
-    yAxis.rotation.y = planet.rotation.y;
-
-    zAxis.rotation.x = planet.rotation.x + Math.PI / 2;
-    zAxis.rotation.y = planet.rotation.y;
-
-    updateUI(
-      planet.rotation.x % (Math.PI * 2),
-      planet.rotation.y % (Math.PI * 2),
-      planet.rotation.z % (Math.PI * 2),
-    );
-  }
-
   starField.rotation.y += 0.0002;
   renderer.render(scene, camera);
 }
@@ -232,10 +197,6 @@ function setupInteractions() {
       duration: 1.5,
       ease: "expo.out",
     });
-  });
-
-  window.addEventListener("dblclick", () => {
-    isAutoOrbit = !isAutoOrbit;
   });
 
   // Initial Animations
