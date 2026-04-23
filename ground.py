@@ -13,7 +13,7 @@ import serial
 import requests
 from pathlib import Path
 from datetime import datetime
-
+from InfoDisplay_Dashboard.consts import EXP, L, P0
 
 # _____ Consts _____
 SERIAL_PORT = "/dev/ttyUSB0"
@@ -65,6 +65,14 @@ class CSVLogger:
 
     def close(self) -> None:
         self._file.close()
+
+
+def barometric_altitude(prs_hpa: float, tmp_c: float) -> float:
+    """
+    Calculates the altitude using pressure: prs_hpa, and temperature: tmp_c.
+    """
+    T_kelvin = tmp_c + 273.15
+    return (T_kelvin / L) * (1 - (prs_hpa / P0) ** (1 / EXP))
 
 
 # ======================

@@ -3,6 +3,7 @@ import busio
 import adafruit_bmp3xx
 import time
 
+
 class BMPHandler:
     def __init__(self) -> None:
         try:
@@ -20,8 +21,8 @@ class BMPHandler:
         while not stop_event.is_set():
             try:
                 with lock:
-                    shared["prs"] = round(self._sensor.pressure,    2)   # hPa
-                    shared["tmp"] = round(self._sensor.temperature, 2)   # degC
+                    shared["prs"] = round(self._sensor.pressure, 2)  # hPa
+                    shared["tmp"] = round(self._sensor.temperature, 2)  # degC
 
             except Exception as e:
                 print("[BMP] Read Error: ", e)

@@ -65,7 +65,7 @@ def get_current_data() -> str:
         f"Latest telemetry at {d.get('timestamp')}:\n"
         f"  Accel  — X:{d.get('ax')}g Y:{d.get('ay')}g Z:{d.get('az')}g\n"
         f"  Gyro   — X:{d.get('gx')}°/s Y:{d.get('gy')}°/s Z:{d.get('gz')}°/s\n"
-        f"  Baro Alt    — Computed Alt:{d.get('computed_alt')}m (above sea level)\n"
+        f"  Alt    — Alt:{d.get('alt')}m (above sea level)\n"
         f"  Temp   — {d.get('tmp')}°C\n"
     )
 
@@ -95,14 +95,6 @@ def isa_pressure(alt_m: float) -> float:
     """Expected pressure in hPa at alt_m metres above sea level."""
     T = T0 - L * alt_m
     return P0 * (T / T0) ** EXP
-
-
-def barometric_altitude(prs_hpa: float, tmp_c: float) -> float:
-    """
-    Calculates the altitude using pressure: prs_hpa, and temperature: tmp_c.
-    """
-    T_kelvin = tmp_c + 273.15
-    return (T_kelvin / L) * (1 - (prs_hpa / P0) ** (1 / EXP))
 
 
 @app.route("/")
@@ -135,13 +127,9 @@ def ingest():
 
     latest_telemetry = packet
 
-    prs = packet.get("prs", 0.0)
-    tmp = packet.get("tmp", 0.0)
+    alt = packet.get("alt", 0.0)
 
-    alt = round(barometric_altitude(prs, tmp), 1)
     alt_display = MAX_ALTITUDE - alt
-
-    packet["computed_alt"] = alt
 
     socketio.emit(
         "new_data",
@@ -231,7 +219,6 @@ def generate_data():
         # print("Emit completed")
 
 
-# TODO: Implement this:
 def send_images():
     used_images = [image["url"] for image in img_list]
     print("send_images called")

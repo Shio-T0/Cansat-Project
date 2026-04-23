@@ -11,79 +11,6 @@ ALT_CALIBRATION_SAMPLES = 10
 # Barometric altitude consts
 T0, P0, L, EXP = 288.15, 1013.25, 0.0065, 5.2561
 
-# Note frequencies (Hz)
-E4, E5, E6 = 330, 659, 1319
-C5, C6 = 523, 1047
-G4, G5, G6 = 392, 784, 1568
-A4, A5 = 440, 880
-B4, Bb4 = 494, 466
-F5 = 698
-D5 = 587
-R = 0
-
-# SUPER MARIO BROS THEME - amazing
-MARIO = [
-    (E5, 2),
-    (E5, 2),
-    (R, 2),
-    (E5, 2),
-    (R, 2),
-    (C5, 2),
-    (E5, 2),
-    (R, 2),
-    (G5, 4),
-    (R, 4),
-    (G4, 4),
-    (R, 4),
-    (C5, 3),
-    (R, 1),
-    (G4, 2),
-    (R, 2),
-    (E4, 3),
-    (R, 1),
-    (A4, 2),
-    (R, 2),
-    (B4, 2),
-    (Bb4, 2),
-    (A4, 2),
-    (R, 2),
-    (G4, 2),
-    (E5, 2),
-    (G5, 2),
-    (A5, 2),
-    (F5, 1),
-    (G5, 1),
-    (R, 2),
-    (E5, 2),
-    (C5, 1),
-    (D5, 1),
-    (B4, 3),
-    (R, 1),
-    (R, 2),
-    (G5, 2),
-    (F5, 1),
-    (E5, 1),
-    (R, 1),
-    (C6, 2),
-    (R, 1),
-    (A4, 2),
-    (R, 1),
-    (G5, 3),
-    (R, 5),
-    (R, 2),
-    (G5, 2),
-    (F5, 1),
-    (E5, 1),
-    (R, 1),
-    (C6, 2),
-    (R, 1),
-    (A4, 2),
-    (R, 1),
-    (G5, 3),
-    (R, 5),
-]
-SIXTEENTH = 0.075
-
 
 class BuzzerHandler:
     def __init__(self) -> None:
@@ -112,22 +39,6 @@ class BuzzerHandler:
         self._beep(0.1, 2000)
         time.sleep(0.1)
         self._beep(0.1, 2000)
-
-    def _mario_cycle(self, stop_event):
-        """Plays one full run of the Mario theme."""
-        for freq, beats in MARIO:
-            if stop_event.is_set():
-                break
-            duration = beats * SIXTEENTH
-            if freq == R:
-                self._tone_off()
-                time.sleep(duration)
-            else:
-                self._tone_on(freq)
-                time.sleep(duration * 0.9)  # 90% note, 10% gap for articulation
-                self._tone_off()
-                time.sleep(duration * 0.1)
-        time.sleep(0.5)
 
     def _baro_alt(self, prs: float, tmp: float) -> float:
         T = tmp + 273.15
